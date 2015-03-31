@@ -19,6 +19,7 @@ import os
 import socket
 import functools
 import itertools
+import spp
 
 
 class error(Exception):
@@ -36,6 +37,7 @@ class Connection(object):
         self.socket_timeout = socket_timeout
         self._sock = None
         self._fp = None
+        self._parser = None
 
     def connect(self):
         if self._sock:
@@ -46,17 +48,20 @@ class Connection(object):
             sock.connect((self.host, self.port))
             self._sock = sock
             self._fp = sock.makefile('r')
+            self._parser = spp.Parser()
         except socket.error:
             raise
 
     def disconnect(self):
+        self._parser.clear()
+        self._parser = None
         if self._sock is None:
             return
         try:
             self._sock.close()
         except socket.error:
             pass
-        self._sock = self._fp = None
+        self._sock = self._fp = self._parser = None
 
     close = disconnect
 
@@ -77,7 +82,23 @@ class Connection(object):
         self._sock.sendall(buf)
 
     def recv(self):
+        # add
+        chunks = []
+        while 1:
+            buf = self._sock.recv(4096)
+
+            if not isinstance(buf, bytes) and not len(buf):
+                self.close()
+                raise socket.error('Socket closed on remote end')
+
+            self._parser.feed(str(buf))
+            chunk = self._parser.get()
+            if chunk is not None:
+                chunks.append(chunk)
+                break
+        ret = chunks[0]
         cmd = self.last_cmd
+        """
         ret = []
         while True:
             line = self._fp.readline().rstrip('\n')
@@ -87,6 +108,7 @@ class Connection(object):
             self._fp.read(1)  # discard '\n'
             ret.append(data)
 
+        """
         st, ret = ret[0], ret[1:]
 
         if st == 'not_found':
