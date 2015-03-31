@@ -78,7 +78,7 @@ class Connection(object):
         args = (cmd, ) + args
         if isinstance(args[-1], int):
             args = args[:-1] + (str(args[-1]), )
-        buf = ''.join('%d\n%s\n' % (len(i), i) for i in args) + '\n'
+        buf = ''.join('%d\n%s\n' % (len(str(i)), str(i)) for i in args) + '\n'
         self._sock.sendall(buf)
 
     def recv(self):
