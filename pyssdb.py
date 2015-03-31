@@ -88,7 +88,7 @@ class Connection(object):
             buf = self._sock.recv(4096)
 
             if not isinstance(buf, bytes) and not len(buf):
-                self.close()
+                self.disconnect()
                 raise socket.error('Socket closed on remote end')
 
             self._parser.feed(str(buf))
