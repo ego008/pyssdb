@@ -114,20 +114,19 @@ class Connection(object):
         if st == 'not_found':
             return None
         elif st == 'ok':
-            if cmd.endswith('keys') or cmd.endswith('list') or \
-                    cmd.endswith('scan') or cmd.endswith('range') or \
-                    (cmd.startswith('multi_') and cmd.endswith('get')):
-                return ret
-            elif len(ret) == 1:
-                if cmd.endswith('set') or cmd.endswith('del') or \
+            if len(ret) == 1:
+                if cmd == 'setx' or cmd == 'zget' or \
+                        cmd.endswith('set') or cmd.endswith('del') or \
                         cmd.endswith('incr') or cmd.endswith('decr') or \
-                        cmd.endswith('size') or cmd.endswith('rank') or \
-                        cmd == 'setx' or cmd == 'zget':
+                        cmd.endswith('size') or cmd.endswith('rank'):
                     return int(ret[0])
                 else:
                     return ret[0]
-            elif not ret:
-                return True
+            elif cmd.endswith('keys') or cmd.endswith('list') or \
+                    cmd.endswith('scan') or cmd.endswith('range') or \
+                    (cmd.startswith('multi_') and cmd.endswith('get')):
+                return ret
+            return True
 
         if ret:
             raise error(*ret)
