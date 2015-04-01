@@ -69,7 +69,8 @@ class Connection(object):
         self.disconnect()
         self.connect()
 
-    def send(self, cmd, *args):
+    def request(self, cmd, *args):
+        # send
         if cmd == 'delete':
             cmd = 'del'
         self.last_cmd = cmd
@@ -80,9 +81,7 @@ class Connection(object):
             args = args[:-1] + (str(args[-1]), )
         buf = ''.join('%d\n%s\n' % (len(str(i)), str(i)) for i in args) + '\n'
         self._sock.sendall(buf)
-
-    def recv(self):
-        # add
+        # recv
         chunks = []
         while 1:
             buf = self._sock.recv(4096)
@@ -97,18 +96,6 @@ class Connection(object):
                 chunks.append(chunk)
                 break
         ret = chunks[0]
-        # cmd = self.last_cmd
-        """
-        ret = []
-        while True:
-            line = self._fp.readline().rstrip('\n')
-            if not line:
-                break
-            data = self._fp.read(int(line))
-            self._fp.read(1)  # discard '\n'
-            ret.append(data)
-
-        """
         st, ret = ret[0], ret[1:]
 
         if st == 'not_found':
@@ -185,8 +172,7 @@ class Client(object):
     def execute_command(self, cmd, *args):
         connection = self.connection_pool.get_connection()
         try:
-            connection.send(cmd, *args)
-            data = connection.recv()
+            data = connection.request(cmd, *args)
         except:
             connection.close()
             raise
