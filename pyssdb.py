@@ -97,7 +97,7 @@ class Connection(object):
                 chunks.append(chunk)
                 break
         ret = chunks[0]
-        cmd = self.last_cmd
+        # cmd = self.last_cmd
         """
         ret = []
         while True:
