@@ -26,5 +26,8 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
+    install_requires=[
+        'spp',
+    ],
 )
 
