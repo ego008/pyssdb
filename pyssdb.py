@@ -36,7 +36,6 @@ class Connection(object):
         self.port = port
         self.socket_timeout = socket_timeout
         self._sock = None
-        self._fp = None
         self._parser = None
 
     def connect(self):
@@ -47,21 +46,20 @@ class Connection(object):
             sock.settimeout(self.socket_timeout)
             sock.connect((self.host, self.port))
             self._sock = sock
-            self._fp = sock.makefile('r')
             self._parser = spp.Parser()
         except socket.error:
             raise
 
     def disconnect(self):
         self._parser.clear()
-        self._parser = None
         if self._sock is None:
+            self._parser = None
             return
         try:
             self._sock.close()
         except socket.error:
             pass
-        self._sock = self._fp = self._parser = None
+        self._sock = self._parser = None
 
     close = disconnect
 
