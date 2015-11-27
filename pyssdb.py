@@ -51,7 +51,8 @@ class Connection(object):
             raise
 
     def disconnect(self):
-        self._parser.clear()
+        if self._parser:
+            self._parser.clear()
         if self._sock is None:
             self._parser = None
             return
@@ -78,7 +79,12 @@ class Connection(object):
         if isinstance(args[-1], int):
             args = args[:-1] + (str(args[-1]), )
         buf = ''.join('%d\n%s\n' % (len(str(i)), str(i)) for i in args) + '\n'
-        self._sock.sendall(buf)
+        # fixed [Errno 32] Broken pipe
+        try:
+            self._sock.sendall(buf)
+        except:
+            self.reconnect()
+            self._sock.sendall(buf)
         # recv
         chunks = []
         while 1:
