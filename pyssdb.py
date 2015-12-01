@@ -72,7 +72,7 @@ class Connection(object):
         # send
         if cmd == 'delete':
             cmd = 'del'
-        self.last_cmd = cmd
+        # self.last_cmd = cmd
         if self._sock is None:
             self.connect()
         args = (cmd, ) + args
